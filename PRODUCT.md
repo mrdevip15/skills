@@ -16,22 +16,24 @@ Game makers, artists, and developers who want to use ChatGPT to create a coheren
 
 ## Product Purpose
 
-The showcase makes the asset generation workflow understandable and tangible. It lets visitors browse the generated Infinity Forest icon pack, inspect an individual icon, understand the deterministic pipeline, and copy a useful prompt pattern for their own asset requests.
+The showcase presents the Infinity Forest icon results. Visitors browse, filter, preview, and download individual icons. Prompts and generation instructions belong in SKILL.md.
 
 ## Positioning
 
-The showcase connects a visual asset gallery to the production facts behind it: categories, target sizes, grid coordinates, transparency, nearest-neighbor scaling, and packaging are all shown together so the work can be reused with confidence.
+The gallery shows real exported assets with their categories, file paths, sizes, and hero classes.
 
 ## Operating Context
 
-Visitors arrive at a static local page, scan the artifact set, filter by category or size, select an icon for inspection, and read the pipeline and validation report before adapting the workflow to a new prompt.
+Visitors open the static page, browse results, filter by category or size, and select an icon to preview or download. A link leads to SKILL.md for prompts and instructions.
 
 ## Capabilities and Constraints
 
 - The existing manifest data is the source of truth for icon counts, categories, sizes, outputs, and coordinates.
 - The page must work from a file based static server and keep the local PNG asset paths intact.
-- Search, category filtering, size filtering, icon selection, magnification, background switching, pipeline stage selection, and manifest/code tabs are existing supported interactions.
-- The visual direction is a modern retro RPG website with a clear, useful catalog experience.
+- Search, category filtering, size filtering, icon selection, enlarged preview, and individual PNG downloads are supported interactions.
+- Show the results simply. Omit statistics panels, process steps, QC claims, and prompt blocks from the website.
+- Keep prompts and instructions in SKILL.md.
+- The theme is a quiet, simple gallery with a subtle RPG palette.
 
 ## Brand Commitments
 

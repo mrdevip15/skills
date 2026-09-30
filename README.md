@@ -5,10 +5,10 @@ This showcase demonstrates the end-to-end execution of the **Pixel Icon Producti
 
 ---
 
-### Quick Links & Demo
-- **Skill Specification**: [SKILL.md](file:///Users/astrea/code/skills/SKILL.md)
-- **Interactive Web Showcase**: [showcase/index.html](file:///Users/astrea/code/skills/showcase/index.html)
-- **Features**: Interactive asset explorer, category and size filtering, instant search, pixel magnifier (1x-6x), transparency inspection stages (dark/light checkerboard, solid black/white), raw manifest coordinate viewer, and automated validation logs.
+### Included
+- Skill instructions: `SKILL.md`
+- Web showcase: `showcase/index.html`
+- Features: simple icon gallery, category and size filters, search, enlarged pixel previews, and individual PNG downloads.
 
 ---
 
