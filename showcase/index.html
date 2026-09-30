@@ -1,1668 +1,780 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pixel Icon Production Pipeline — Showcase</title>
-  <meta name="description" content="Production showcase and interactive demonstration of the Pixel Game Icon Generator, Atlas Builder & Auto Slicer skill pipeline.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Infinity Forest — Asset Forge Showcase</title>
+  <meta name="description" content="Explore a production-ready RPG icon pack and reuse the prompt recipe behind it.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-darkest: #07090e;
-      --bg-darker: #0c1017;
-      --bg-card: #131926;
-      --bg-card-hover: #1b2336;
-      --bg-card-subtle: #0f1420;
-      --border-color: #232d42;
-      --border-accent: #3b82f640;
-      
-      --gold-primary: #f59e0b;
-      --gold-glow: #fbbf24;
-      --gold-subtle: #78350f44;
-      
-      --cyan-arcane: #38bdf8;
-      --emerald-pass: #10b981;
-      --emerald-glow: #34d399;
-      --rose-accent: #f43f5e;
-      --purple-accent: #a855f7;
-      
-      --text-main: #f1f5f9;
-      --text-muted: #94a3b8;
-      --text-dim: #64748b;
-
-      --radius-sm: 6px;
-      --radius-md: 10px;
-      --radius-lg: 16px;
-      --radius-xl: 24px;
-      
-      --shadow-card: 0 8px 24px -4px rgba(0, 0, 0, 0.45);
-      --shadow-glow: 0 0 25px rgba(245, 158, 11, 0.15);
-      --shadow-cyan: 0 0 25px rgba(56, 189, 248, 0.15);
+      --ink: #101612;
+      --ink-soft: #17211b;
+      --ink-deep: #0b100d;
+      --ink-line: rgba(220, 225, 200, .12);
+      --paper: #f0e4c7;
+      --paper-soft: #d9ccb0;
+      --moss: #9ba99b;
+      --moss-dark: #68776a;
+      --ember: #d97a45;
+      --ember-dark: #8f4c32;
+      --brass: #c9a967;
+      --cream: #fff7df;
+      --good: #a6c79e;
+      --mono: 'DM Mono', monospace;
+      --sans: 'DM Sans', system-ui, sans-serif;
+      --serif: 'Cormorant Garamond', Georgia, serif;
+      --shadow: 0 24px 70px rgba(0, 0, 0, .28);
+      --max: 1360px;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
-      background: radial-gradient(circle at 50% 0%, #151d30 0%, var(--bg-darkest) 75%);
-      color: var(--text-main);
-      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-      min-height: 100vh;
+      margin: 0;
+      min-width: 320px;
+      color: var(--paper);
+      background: var(--ink);
+      font-family: var(--sans);
       line-height: 1.5;
       overflow-x: hidden;
     }
-
-    /* Pixel Art Rendering Utility */
-    .pixel-art {
-      image-rendering: pixelated;
-      image-rendering: -moz-crisp-edges;
-      image-rendering: crisp-edges;
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      opacity: .06;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+      mix-blend-mode: screen;
     }
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -3;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 82% 8%, rgba(217, 122, 69, .12), transparent 30rem),
+        radial-gradient(circle at 13% 34%, rgba(201, 169, 103, .07), transparent 25rem);
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, input:focus-visible, a:focus-visible {
+      outline: 2px solid var(--paper);
+      outline-offset: 4px;
+    }
+    a { color: inherit; }
+    .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+    .pixel-art { image-rendering: pixelated; image-rendering: crisp-edges; }
+    .wrap { width: min(var(--max), calc(100% - 64px)); margin: 0 auto; }
 
-    /* Header & Navigation */
-    header {
-      border-bottom: 1px solid var(--border-color);
-      background: rgba(12, 16, 23, 0.85);
-      backdrop-filter: blur(12px);
+    .topbar {
       position: sticky;
       top: 0;
-      z-index: 100;
+      z-index: 20;
+      border-bottom: 1px solid var(--ink-line);
+      background: rgba(16, 22, 18, .86);
+      backdrop-filter: blur(18px);
     }
-
-    .nav-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 1rem 2rem;
+    .topbar-inner {
+      min-height: 76px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 1.5rem;
+      gap: 24px;
     }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
+    .brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
+    .seal {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border: 1px solid var(--brass);
+      background: var(--brass);
+      color: var(--ink);
+      clip-path: polygon(50% 0, 100% 18%, 92% 82%, 50% 100%, 8% 82%, 0 18%);
+    }
+    .seal svg { width: 22px; height: 22px; }
+    .brand-name { font-size: .8rem; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; }
+    .brand-sub { margin-top: 1px; color: var(--moss); font: .65rem var(--mono); letter-spacing: .08em; }
+    .topnav { display: flex; align-items: center; gap: 22px; }
+    .topnav a {
+      color: var(--moss);
       text-decoration: none;
-      color: var(--text-main);
-    }
-
-    .brand-icon {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, var(--gold-primary), #d97706);
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
-      border: 1px solid var(--gold-glow);
-    }
-
-    .brand-title {
-      font-family: 'Cinzel', serif;
-      font-size: 1.25rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      background: linear-gradient(120deg, #fff, #fbbf24);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .brand-tag {
-      font-size: 0.7rem;
-      color: var(--cyan-arcane);
-      letter-spacing: 0.1em;
+      font: .72rem var(--mono);
+      letter-spacing: .08em;
       text-transform: uppercase;
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 600;
+      transition: color .2s ease;
     }
-
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .nav-tab-btn {
+    .topnav a:hover { color: var(--paper); }
+    .nav-cta {
+      border: 1px solid rgba(240, 228, 199, .28);
       background: transparent;
-      border: 1px solid transparent;
-      color: var(--text-muted);
-      padding: 0.5rem 1.1rem;
-      border-radius: var(--radius-md);
-      font-size: 0.88rem;
-      font-weight: 500;
+      color: var(--paper);
+      padding: 10px 14px;
+      font: .7rem var(--mono);
+      letter-spacing: .05em;
       cursor: pointer;
-      transition: all 0.2s ease;
-      font-family: inherit;
+      transition: transform .2s ease, background .2s ease, border-color .2s ease;
     }
+    .nav-cta:hover { transform: translateY(-2px); border-color: var(--ember); background: rgba(217, 122, 69, .13); }
+    .nav-cta:active { transform: translateY(0); }
 
-    .nav-tab-btn:hover {
-      color: var(--text-main);
-      background: var(--bg-card);
+    .hero { padding: 72px 0 56px; position: relative; }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(400px, .9fr);
+      gap: 64px;
+      align-items: center;
     }
-
-    .nav-tab-btn.active {
-      color: var(--gold-glow);
-      background: var(--gold-subtle);
-      border-color: rgba(245, 158, 11, 0.4);
-    }
-
-    /* Container */
-    .main-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 2.5rem 2rem 5rem 2rem;
-    }
-
-    /* Hero Section */
-    .hero {
-      text-align: center;
-      margin-bottom: 3.5rem;
-      position: relative;
-    }
-
-    .hero-badge {
+    .eyebrow {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.35rem 0.9rem;
-      background: rgba(56, 189, 248, 0.1);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--cyan-arcane);
+      gap: 10px;
+      color: var(--brass);
+      font: .7rem var(--mono);
+      letter-spacing: .14em;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 1.25rem;
     }
-
-    .hero-title {
-      font-family: 'Cinzel', serif;
-      font-size: 2.75rem;
-      font-weight: 900;
-      line-height: 1.2;
-      margin-bottom: 1rem;
-      letter-spacing: 0.02em;
+    .eyebrow::before { content: ""; width: 24px; height: 1px; background: var(--brass); }
+    h1, h2, h3, p { margin-top: 0; }
+    .hero h1 {
+      max-width: 720px;
+      margin: 20px 0 22px;
+      color: var(--cream);
+      font: 600 clamp(4rem, 8vw, 8.5rem)/.82 var(--serif);
+      letter-spacing: -.055em;
+      text-wrap: balance;
     }
-
-    .hero-title span {
-      background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #ea580c 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .hero-desc {
-      color: var(--text-muted);
-      max-width: 780px;
-      margin: 0 auto 2.5rem auto;
-      font-size: 1.1rem;
-      font-weight: 300;
-      line-height: 1.7;
-    }
-
-    /* Stat Cards Banner */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.25rem;
-      margin-bottom: 3.5rem;
-    }
-
-    .stat-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: 1.25rem 1.5rem;
-      text-align: left;
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.2s ease, border-color 0.2s ease;
-      box-shadow: var(--shadow-card);
-    }
-
-    .stat-card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(245, 158, 11, 0.3);
-    }
-
-    .stat-card::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--accent, var(--gold-primary)), transparent);
-    }
-
-    .stat-num {
-      font-size: 2rem;
-      font-weight: 700;
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--text-main);
-      margin-bottom: 0.2rem;
-      display: flex;
-      align-items: baseline;
-      gap: 0.25rem;
-    }
-
-    .stat-num small {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      font-weight: 400;
-    }
-
-    .stat-label {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      font-weight: 600;
-    }
-
-    /* Pipeline Process Stepper */
-    .pipeline-section {
-      background: var(--bg-card-subtle);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-xl);
-      padding: 2.5rem;
-      margin-bottom: 3.5rem;
-      position: relative;
-    }
-
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 2rem;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .section-title {
-      font-family: 'Cinzel', serif;
-      font-size: 1.5rem;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .section-title::before {
-      content: '';
-      width: 4px;
-      height: 1.25rem;
-      background: var(--gold-primary);
-      border-radius: 2px;
-      box-shadow: 0 0 10px var(--gold-glow);
-    }
-
-    .pipeline-stepper {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: relative;
-      overflow-x: auto;
-      padding-bottom: 1rem;
-      gap: 1rem;
-    }
-
-    .pipeline-step {
-      flex: 1;
-      min-width: 150px;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 1.2rem 1rem;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      position: relative;
-    }
-
-    .pipeline-step:hover {
-      background: var(--bg-card-hover);
-      border-color: var(--cyan-arcane);
-      transform: translateY(-3px);
-    }
-
-    .pipeline-step.active {
-      border-color: var(--gold-primary);
-      background: linear-gradient(180deg, rgba(245, 158, 11, 0.12) 0%, var(--bg-card) 100%);
-      box-shadow: var(--shadow-glow);
-    }
-
-    .step-badge {
-      width: 26px;
-      height: 26px;
-      background: var(--bg-darkest);
-      border: 1px solid var(--border-color);
-      border-radius: 50%;
+    .hero h1 em { color: var(--ember); font-style: normal; }
+    .hero-copy { max-width: 560px; color: var(--paper-soft); font-size: 1.05rem; line-height: 1.75; }
+    .hero-actions { display: flex; align-items: center; gap: 16px; margin-top: 30px; flex-wrap: wrap; }
+    .primary-btn, .text-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.75rem;
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--text-muted);
-      margin-bottom: 0.6rem;
+      gap: 9px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform .2s ease, background .2s ease, color .2s ease;
     }
-
-    .pipeline-step.active .step-badge {
-      background: var(--gold-primary);
-      color: #000;
+    .primary-btn {
+      border: 1px solid var(--ember);
+      background: var(--ember);
+      color: var(--ink);
+      padding: 14px 19px;
       font-weight: 700;
-      border-color: var(--gold-glow);
+      font-size: .88rem;
     }
+    .primary-btn:hover { transform: translateY(-2px); background: #e08b59; }
+    .primary-btn:active { transform: translateY(0); }
+    .text-btn { border: 0; background: none; color: var(--paper-soft); padding: 10px 0; font: .78rem var(--mono); }
+    .text-btn:hover { color: var(--paper); }
+    .hero-note { margin: 20px 0 0; color: var(--moss-dark); font: .7rem var(--mono); }
 
-    .step-title {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text-main);
-      margin-bottom: 0.25rem;
-    }
-
-    .step-sub {
-      font-size: 0.72rem;
-      color: var(--text-dim);
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    /* Pipeline Step Detail Panel */
-    .step-detail-box {
-      margin-top: 1.5rem;
-      background: var(--bg-darker);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: 1.75rem;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
-    }
-
-    @media (max-width: 900px) {
-      .step-detail-box {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .step-detail-left h4 {
-      font-size: 1.1rem;
-      color: var(--gold-glow);
-      margin-bottom: 0.75rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .step-detail-left p {
-      color: var(--text-muted);
-      font-size: 0.92rem;
-      line-height: 1.6;
-      margin-bottom: 1rem;
-    }
-
-    .step-highlights {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .step-highlights li {
-      font-size: 0.85rem;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .step-highlights li span.dot {
-      width: 6px;
-      height: 6px;
-      background: var(--cyan-arcane);
-      border-radius: 50%;
-    }
-
-    .step-code-preview {
-      background: var(--bg-darkest);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 1rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
-      color: #cbd5e1;
-      overflow-x: auto;
-      max-height: 250px;
-    }
-
-    /* Interactive Icon Gallery Controls */
-    .gallery-controls {
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-      margin-bottom: 2rem;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem;
-    }
-
-    .controls-top-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .search-box {
+    .artifact-stage {
       position: relative;
-      min-width: 280px;
-      flex: 1;
-      max-width: 450px;
+      min-height: 410px;
+      padding: 22px;
+      border: 1px solid var(--ink-line);
+      background: rgba(23, 33, 27, .8);
+      box-shadow: var(--shadow);
+      transform: rotate(1.2deg);
     }
+    .artifact-stage::before {
+      content: "FIELD GUIDE / 01";
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      color: var(--moss-dark);
+      font: .63rem var(--mono);
+      letter-spacing: .14em;
+    }
+    .artifact-stage::after {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      border: 1px solid rgba(201, 169, 103, .2);
+      pointer-events: none;
+    }
+    .artifact-plate {
+      position: relative;
+      min-height: 364px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(201, 169, 103, .08), transparent 38%),
+        var(--ink-deep);
+    }
+    .artifact-plate::before {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      border: 1px solid rgba(201, 169, 103, .28);
+      transform: rotate(45deg);
+    }
+    .orbit-label {
+      position: absolute;
+      color: var(--moss);
+      font: .62rem var(--mono);
+      letter-spacing: .07em;
+      text-transform: uppercase;
+    }
+    .orbit-label.north { top: 37px; left: 50%; transform: translateX(-50%); }
+    .orbit-label.east { top: 50%; right: 20px; transform: translateY(-50%) rotate(90deg); }
+    .hero-icon {
+      position: relative;
+      z-index: 1;
+      width: 144px;
+      height: 144px;
+      display: grid;
+      place-items: center;
+      background: rgba(240, 228, 199, .08);
+      border: 1px solid rgba(240, 228, 199, .24);
+      box-shadow: 0 0 0 10px rgba(217, 122, 69, .06), inset 0 0 0 1px rgba(240, 228, 199, .08);
+    }
+    .hero-icon img { width: 96px; height: 96px; }
+    .orbit-chip {
+      position: absolute;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border: 1px solid rgba(240, 228, 199, .15);
+      background: rgba(16, 22, 18, .94);
+      color: var(--paper-soft);
+      font: .62rem var(--mono);
+    }
+    .orbit-chip img { width: 26px; height: 26px; }
+    .orbit-chip.one { top: 76px; left: 40px; }
+    .orbit-chip.two { right: 38px; bottom: 78px; }
+    .orbit-chip.three { bottom: 32px; left: 50%; transform: translateX(-50%); }
+    .artifact-caption { display: flex; justify-content: space-between; gap: 12px; margin-top: 16px; color: var(--moss); font: .65rem var(--mono); }
+    .artifact-caption strong { color: var(--paper); font-weight: 500; }
 
+    .statbar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid var(--ink-line);
+      border-bottom: 1px solid var(--ink-line);
+    }
+    .stat {
+      min-height: 116px;
+      padding: 25px 24px 21px;
+      border-right: 1px solid var(--ink-line);
+    }
+    .stat:last-child { border-right: 0; }
+    .stat-num { color: var(--cream); font: 500 clamp(1.8rem, 3vw, 2.8rem)/1 var(--serif); }
+    .stat-label { margin-top: 9px; color: var(--moss); font: .65rem var(--mono); letter-spacing: .11em; text-transform: uppercase; }
+
+    .section { padding: 120px 0 0; }
+    .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 30px; }
+    .section-kicker { color: var(--brass); font: .7rem var(--mono); letter-spacing: .14em; text-transform: uppercase; }
+    .section-title { margin: 7px 0 0; color: var(--cream); font: 600 clamp(2.4rem, 5vw, 4.4rem)/.88 var(--serif); letter-spacing: -.045em; text-wrap: balance; }
+    .section-intro { max-width: 370px; margin-bottom: 4px; color: var(--moss); font-size: .91rem; line-height: 1.65; }
+    .catalog-shell { border-top: 1px solid var(--ink-line); }
+    .catalog-toolbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 20px;
+      padding: 18px 0; border-bottom: 1px solid var(--ink-line); flex-wrap: wrap;
+    }
+    .search-wrap { position: relative; width: min(100%, 350px); }
+    .search-wrap svg { position: absolute; top: 50%; left: 13px; width: 16px; height: 16px; color: var(--moss); transform: translateY(-50%); }
     .search-input {
-      width: 100%;
-      background: var(--bg-darker);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 0.65rem 1rem 0.65rem 2.4rem;
-      color: var(--text-main);
-      font-size: 0.9rem;
-      font-family: inherit;
-      outline: none;
-      transition: border-color 0.2s ease;
+      width: 100%; padding: 12px 14px 12px 39px;
+      border: 1px solid var(--ink-line); background: var(--ink-soft); color: var(--paper);
+      font-size: .83rem; transition: border-color .2s ease, background .2s ease;
     }
+    .search-input::placeholder { color: var(--moss-dark); }
+    .search-input:focus { border-color: rgba(217, 122, 69, .75); background: #1c281f; outline: none; }
+    .size-filters { display: flex; align-items: center; gap: 7px; }
+    .filter-label { margin-right: 5px; color: var(--moss-dark); font: .64rem var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+    .size-pill, .cat-btn {
+      border: 1px solid var(--ink-line); background: transparent; color: var(--moss);
+      padding: 9px 11px; cursor: pointer; font: .68rem var(--mono);
+      transition: color .2s ease, background .2s ease, border-color .2s ease, transform .2s ease;
+    }
+    .size-pill:hover, .cat-btn:hover { color: var(--paper); border-color: rgba(240, 228, 199, .35); }
+    .size-pill.active, .cat-btn.active { color: var(--ink); border-color: var(--ember); background: var(--ember); }
+    .size-pill:active, .cat-btn:active { transform: translateY(1px); }
+    .category-row { display: flex; align-items: center; gap: 8px; padding: 15px 0; overflow-x: auto; scrollbar-width: thin; }
+    .cat-btn { white-space: nowrap; }
+    .cat-badge { margin-left: 7px; color: var(--moss-dark); }
+    .cat-btn.active .cat-badge { color: var(--ink); }
 
-    .search-input:focus {
-      border-color: var(--gold-primary);
-      box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
+    .gallery-layout { display: grid; grid-template-columns: minmax(0, 1fr) 338px; gap: 36px; align-items: start; padding-top: 14px; }
+    .gallery-meta { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 0 0 12px; color: var(--moss); font: .68rem var(--mono); }
+    .icons-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(106px, 1fr)); gap: 9px;
+      max-height: 760px; overflow: auto; padding: 3px 5px 5px 0;
+      scrollbar-color: var(--moss-dark) transparent;
     }
-
-    .search-icon {
-      position: absolute;
-      left: 0.85rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-dim);
-      font-size: 0.9rem;
-    }
-
-    .size-filter-group {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: var(--bg-darker);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 0.25rem;
-    }
-
-    .size-pill {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      padding: 0.4rem 0.85rem;
-      font-size: 0.8rem;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 500;
-      transition: all 0.2s ease;
-    }
-
-    .size-pill:hover {
-      color: var(--text-main);
-    }
-
-    .size-pill.active {
-      background: var(--gold-primary);
-      color: #000;
-      font-weight: 700;
-    }
-
-    /* Category Tabs */
-    .category-pills {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      overflow-x: auto;
-      padding-bottom: 0.25rem;
-      flex-wrap: wrap;
-    }
-
-    .cat-btn {
-      background: var(--bg-darker);
-      border: 1px solid var(--border-color);
-      border-radius: 999px;
-      padding: 0.4rem 1rem;
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-family: inherit;
-      transition: all 0.2s ease;
-    }
-
-    .cat-btn:hover {
-      border-color: var(--text-dim);
-      color: var(--text-main);
-    }
-
-    .cat-btn.active {
-      background: var(--gold-subtle);
-      border-color: var(--gold-primary);
-      color: var(--gold-glow);
-      font-weight: 600;
-    }
-
-    .cat-badge {
-      background: var(--bg-darkest);
-      border-radius: 999px;
-      padding: 0.1rem 0.5rem;
-      font-size: 0.72rem;
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--text-dim);
-    }
-
-    .cat-btn.active .cat-badge {
-      background: rgba(245, 158, 11, 0.2);
-      color: var(--gold-glow);
-    }
-
-    /* Icon Grid Layout */
-    .gallery-layout {
-      display: grid;
-      grid-template-columns: 1fr 380px;
-      gap: 2rem;
-      align-items: start;
-    }
-
-    @media (max-width: 1100px) {
-      .gallery-layout {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .icons-grid-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-      gap: 1rem;
-      max-height: 850px;
-      overflow-y: auto;
-      padding-right: 0.5rem;
-    }
-
-    /* Custom Scrollbar */
-    .icons-grid-container::-webkit-scrollbar {
-      width: 8px;
-    }
-    .icons-grid-container::-webkit-scrollbar-track {
-      background: var(--bg-darker);
-      border-radius: 4px;
-    }
-    .icons-grid-container::-webkit-scrollbar-thumb {
-      background: var(--border-color);
-      border-radius: 4px;
-    }
-    .icons-grid-container::-webkit-scrollbar-thumb:hover {
-      background: var(--text-dim);
-    }
-
     .icon-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 0.85rem 0.5rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
+      position: relative; display: flex; min-height: 132px; flex-direction: column; align-items: center; justify-content: center;
+      gap: 8px; padding: 11px 7px; border: 1px solid var(--ink-line); background: rgba(23, 33, 27, .72);
+      cursor: pointer; transition: transform .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
     }
-
-    .icon-card:hover {
-      background: var(--bg-card-hover);
-      border-color: var(--gold-primary);
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-    }
-
-    .icon-card.selected {
-      border-color: var(--cyan-arcane);
-      background: rgba(56, 189, 248, 0.08);
-      box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
-    }
-
+    .icon-card::before { content: ""; position: absolute; top: 0; left: 0; width: 17px; height: 1px; background: var(--brass); opacity: .6; }
+    .icon-card:hover { transform: translateY(-3px); border-color: rgba(217, 122, 69, .7); background: #1d2a21; }
+    .icon-card.selected { border-color: var(--ember); background: rgba(217, 122, 69, .11); box-shadow: inset 0 0 0 1px rgba(217, 122, 69, .16); }
     .icon-preview-box {
-      width: 64px;
-      height: 64px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-image: 
-        linear-gradient(45deg, #182030 25%, transparent 25%), 
-        linear-gradient(-45deg, #182030 25%, transparent 25%), 
-        linear-gradient(45deg, transparent 75%, #182030 75%), 
-        linear-gradient(-45deg, transparent 75%, #182030 75%);
-      background-size: 16px 16px;
-      background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
-      background-color: #0f1420;
-      border-radius: var(--radius-sm);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      margin-bottom: 0.6rem;
-      transition: transform 0.2s ease;
+      width: 66px; height: 66px; display: grid; place-items: center; border: 1px solid rgba(240, 228, 199, .1);
+      background-color: #121a15;
+      background-image: linear-gradient(45deg, #1d2a20 25%, transparent 25%), linear-gradient(-45deg, #1d2a20 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #1d2a20 75%), linear-gradient(-45deg, transparent 75%, #1d2a20 75%);
+      background-size: 14px 14px; background-position: 0 0, 0 7px, 7px -7px, -7px 0;
     }
+    .icon-preview-img { width: 49px; height: 49px; }
+    .icon-card-name { width: 100%; overflow: hidden; color: var(--paper); font: .64rem var(--mono); text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+    .icon-card-dim { color: var(--moss-dark); font: .6rem var(--mono); }
 
-    .icon-card:hover .icon-preview-box {
-      transform: scale(1.08);
-    }
-
-    .icon-preview-img {
-      max-width: 48px;
-      max-height: 48px;
-      display: block;
-    }
-
-    .icon-card-name {
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--text-main);
-      width: 100%;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    .icon-card-dim {
-      font-size: 0.68rem;
-      color: var(--text-dim);
-      font-family: 'JetBrains Mono', monospace;
-      margin-top: 0.2rem;
-    }
-
-    /* Inspector Sidebar */
     .inspector-panel {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-xl);
-      padding: 1.75rem;
-      position: sticky;
-      top: 5.5rem;
-      box-shadow: var(--shadow-card);
+      position: sticky; top: 98px; padding: 20px; border: 1px solid var(--ink-line); background: var(--ink-soft);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, .18);
     }
-
-    .inspector-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 1rem;
-      margin-bottom: 1.25rem;
+    .inspector-head { display: flex; align-items: start; justify-content: space-between; gap: 12px; padding-bottom: 15px; border-bottom: 1px solid var(--ink-line); }
+    .inspector-label { color: var(--brass); font: .62rem var(--mono); letter-spacing: .13em; text-transform: uppercase; }
+    .inspector-name { margin: 7px 0 0; color: var(--cream); font: 600 1.8rem/.95 var(--serif); text-transform: capitalize; }
+    .inspector-cat { padding: 5px 7px; border: 1px solid rgba(201, 169, 103, .4); color: var(--brass); font: .59rem var(--mono); }
+    .inspector-stage {
+      display: grid; place-items: center; min-height: 232px; margin: 17px 0;
+      border: 1px solid var(--ink-line); background: #0d130f; overflow: hidden;
     }
-
-    .inspector-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--gold-glow);
-      font-family: 'Cinzel', serif;
-      letter-spacing: 0.05em;
-    }
-
-    .inspector-magnifier-stage {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 1rem;
-      border-radius: var(--radius-lg);
-      margin-bottom: 1.25rem;
-      position: relative;
-      min-height: 220px;
-      transition: background 0.3s ease;
-    }
-
-    /* Checkerboard patterns for alpha testing */
     .stage-checker-dark {
-      background-image: 
-        linear-gradient(45deg, #1b2333 25%, transparent 25%), 
-        linear-gradient(-45deg, #1b2333 25%, transparent 25%), 
-        linear-gradient(45deg, transparent 75%, #1b2333 75%), 
-        linear-gradient(-45deg, transparent 75%, #1b2333 75%);
-      background-size: 20px 20px;
-      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-      background-color: #0b0f19;
-      border: 1px solid var(--border-color);
+      background-image: linear-gradient(45deg, #1d2a20 25%, transparent 25%), linear-gradient(-45deg, #1d2a20 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #1d2a20 75%), linear-gradient(-45deg, transparent 75%, #1d2a20 75%);
+      background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0; background-color: #101711;
     }
+    .stage-checker-light { background-image: linear-gradient(45deg, #d8ccb3 25%, transparent 25%), linear-gradient(-45deg, #d8ccb3 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #d8ccb3 75%), linear-gradient(-45deg, transparent 75%, #d8ccb3 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0; background-color: #f5ecd8; }
+    .stage-solid-black { background: #000; }
+    .stage-solid-white { background: #fff; }
+    .magnified-icon { image-rendering: pixelated; transition: transform .2s ease; }
+    .inspector-controls { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 15px; }
+    .zoom-btn-group, .bg-toggles { display: flex; gap: 5px; }
+    .zoom-btn { border: 1px solid var(--ink-line); background: transparent; color: var(--moss); padding: 6px 8px; cursor: pointer; font: .6rem var(--mono); }
+    .zoom-btn:hover, .zoom-btn.active { color: var(--paper); border-color: var(--brass); }
+    .bg-dot { width: 17px; height: 17px; border: 1px solid var(--ink-line); cursor: pointer; }
+    .bg-dot.active { outline: 1px solid var(--paper); outline-offset: 2px; }
+    .meta-table { width: 100%; border-collapse: collapse; font-size: .71rem; }
+    .meta-table tr { border-bottom: 1px solid rgba(240, 228, 199, .07); }
+    .meta-table td { padding: 10px 0; vertical-align: top; }
+    .meta-label { width: 37%; color: var(--moss-dark); }
+    .meta-val { color: var(--paper-soft); font-family: var(--mono); text-align: right; overflow-wrap: anywhere; }
+    .qc-badge { display: flex; align-items: center; gap: 8px; justify-content: center; margin-top: 16px; padding: 10px; border: 1px solid rgba(166, 199, 158, .35); color: var(--good); font: .63rem var(--mono); }
+    .qc-badge svg { width: 14px; height: 14px; }
 
-    .stage-checker-light {
-      background-image: 
-        linear-gradient(45deg, #e2e8f0 25%, transparent 25%), 
-        linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), 
-        linear-gradient(45deg, transparent 75%, #e2e8f0 75%), 
-        linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
-      background-size: 20px 20px;
-      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-      background-color: #ffffff;
-      border: 1px solid #cbd5e1;
+    .recipe {
+      display: grid; grid-template-columns: .75fr 1.25fr; gap: 52px; align-items: start;
+      margin-top: 120px; padding: 36px 0 42px; border-top: 1px solid var(--ink-line); border-bottom: 1px solid var(--ink-line);
     }
+    .recipe-title { margin: 7px 0 15px; color: var(--cream); font: 600 clamp(2.4rem, 5vw, 4.2rem)/.88 var(--serif); letter-spacing: -.04em; }
+    .recipe-copy { max-width: 350px; color: var(--moss); font-size: .9rem; line-height: 1.7; }
+    .recipe-card { border: 1px solid var(--ink-line); background: var(--ink-soft); }
+    .recipe-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 13px 16px; border-bottom: 1px solid var(--ink-line); color: var(--moss); font: .65rem var(--mono); letter-spacing: .06em; }
+    .copy-btn { border: 0; background: transparent; color: var(--ember); cursor: pointer; font: .65rem var(--mono); text-transform: uppercase; }
+    .copy-btn:hover { color: var(--paper); }
+    .recipe-code { margin: 0; padding: 20px; color: var(--paper-soft); font: .75rem/1.8 var(--mono); white-space: pre-wrap; }
+    .recipe-points { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--ink-line); border-top: 1px solid var(--ink-line); }
+    .recipe-point { padding: 14px; background: var(--ink-soft); }
+    .recipe-point b { display: block; color: var(--brass); font: .65rem var(--mono); letter-spacing: .08em; }
+    .recipe-point span { display: block; margin-top: 6px; color: var(--moss); font-size: .75rem; }
 
-    .stage-solid-black {
-      background: #000000;
-      border: 1px solid #222;
+    .workflow { padding-bottom: 100px; }
+    .pipeline {
+      display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 42px; margin-top: 28px; padding: 26px 0;
+      border-top: 1px solid var(--ink-line); border-bottom: 1px solid var(--ink-line);
     }
+    .pipeline-nav { display: flex; flex-direction: column; gap: 6px; }
+    .pipeline-step { display: grid; grid-template-columns: 32px 1fr; gap: 11px; align-items: center; padding: 10px 12px; border: 1px solid transparent; background: transparent; text-align: left; cursor: pointer; }
+    .pipeline-step:hover { border-color: var(--ink-line); background: rgba(23, 33, 27, .6); }
+    .pipeline-step.active { border-color: rgba(217, 122, 69, .55); background: rgba(217, 122, 69, .1); }
+    .step-number { display: grid; place-items: center; width: 26px; height: 26px; border: 1px solid var(--ink-line); color: var(--moss); font: .63rem var(--mono); }
+    .pipeline-step.active .step-number { border-color: var(--ember); color: var(--ember); }
+    .step-title { color: var(--paper); font-size: .78rem; font-weight: 600; }
+    .step-sub { margin-top: 2px; color: var(--moss-dark); font: .6rem var(--mono); }
+    .pipeline-detail { min-height: 260px; padding: 26px; border: 1px solid var(--ink-line); background: rgba(23, 33, 27, .48); }
+    .pipeline-detail h3 { margin: 0 0 9px; color: var(--cream); font: 600 2.05rem/.95 var(--serif); }
+    .pipeline-detail p { max-width: 620px; color: var(--moss); font-size: .87rem; line-height: 1.7; }
+    .step-highlights { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px 22px; margin: 20px 0 0; padding: 0; list-style: none; }
+    .step-highlights li { display: flex; align-items: start; gap: 8px; color: var(--paper-soft); font-size: .73rem; }
+    .step-highlights li::before { content: "✦"; color: var(--ember); }
+    .step-code { margin-top: 24px; padding: 14px; border: 1px solid var(--ink-line); background: var(--ink-deep); color: var(--moss); font: .68rem/1.7 var(--mono); white-space: pre-wrap; overflow: auto; }
 
-    .stage-solid-white {
-      background: #ffffff;
-      border: 1px solid #ddd;
+    .proof { padding: 38px 0 110px; }
+    .proof-tabs { display: flex; gap: 0; overflow-x: auto; border-bottom: 1px solid var(--ink-line); }
+    .view-tab-btn { border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--moss); padding: 13px 16px; cursor: pointer; white-space: nowrap; font: .68rem var(--mono); }
+    .view-tab-btn:hover { color: var(--paper); }
+    .view-tab-btn.active { border-color: var(--ember); color: var(--paper); }
+    .tab-pane { display: none; padding-top: 25px; }
+    .tab-pane.active { display: block; }
+    .qc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .qc-item { min-height: 145px; padding: 19px; border: 1px solid var(--ink-line); background: rgba(23, 33, 27, .52); }
+    .qc-icon { color: var(--good); font: 1rem var(--mono); }
+    .qc-content h4 { margin: 16px 0 7px; color: var(--paper); font-size: .84rem; }
+    .qc-content p { margin: 0; color: var(--moss); font-size: .73rem; line-height: 1.6; }
+    .code-block { max-height: 420px; margin: 0; padding: 18px; overflow: auto; border: 1px solid var(--ink-line); background: var(--ink-deep); color: var(--moss); font: .7rem/1.7 var(--mono); white-space: pre-wrap; }
+
+    footer { padding: 30px 0 46px; border-top: 1px solid var(--ink-line); color: var(--moss-dark); font: .65rem var(--mono); }
+    .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+    .footer-inner span:last-child { color: var(--brass); }
+
+    @media (max-width: 980px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 42px; }
+      .artifact-stage { max-width: 650px; width: 100%; margin-left: auto; }
+      .gallery-layout { grid-template-columns: 1fr; }
+      .inspector-panel { position: relative; top: auto; max-width: 520px; }
+      .recipe { grid-template-columns: 1fr; gap: 26px; }
+      .pipeline { grid-template-columns: 1fr; gap: 24px; }
+      .pipeline-nav { display: grid; grid-template-columns: repeat(4, 1fr); }
+      .pipeline-step { grid-template-columns: 26px 1fr; }
+      .step-sub { display: none; }
     }
-
-    .stage-hero-tint {
-      background: radial-gradient(circle, #1e293b 0%, #090d16 100%);
-      border: 1px solid #334155;
+    @media (max-width: 700px) {
+      .wrap { width: min(var(--max), calc(100% - 34px)); }
+      .topbar-inner { min-height: 67px; }
+      .topnav a { display: none; }
+      .hero { padding-top: 52px; }
+      .hero h1 { font-size: clamp(3.5rem, 17vw, 6rem); }
+      .hero-copy { font-size: .94rem; }
+      .artifact-stage { min-height: 350px; padding: 14px; }
+      .artifact-plate { min-height: 318px; }
+      .artifact-stage::after { inset: 7px; }
+      .hero-icon { width: 120px; height: 120px; }
+      .hero-icon img { width: 80px; height: 80px; }
+      .orbit-chip.one { left: 16px; top: 66px; }
+      .orbit-chip.two { right: 14px; bottom: 66px; }
+      .statbar { grid-template-columns: repeat(2, 1fr); }
+      .stat:nth-child(2) { border-right: 0; }
+      .stat:nth-child(-n+2) { border-bottom: 1px solid var(--ink-line); }
+      .stat { min-height: 102px; padding: 20px 15px; }
+      .section { padding-top: 86px; }
+      .section-heading { display: block; }
+      .section-intro { margin-top: 16px; }
+      .catalog-toolbar { align-items: stretch; flex-direction: column; }
+      .search-wrap { width: 100%; }
+      .size-filters { justify-content: space-between; }
+      .icons-grid { grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); max-height: 620px; }
+      .icon-card { min-height: 120px; }
+      .icon-preview-box { width: 58px; height: 58px; }
+      .icon-preview-img { width: 43px; height: 43px; }
+      .recipe-points { grid-template-columns: 1fr; }
+      .pipeline-nav { grid-template-columns: repeat(2, 1fr); }
+      .step-highlights { grid-template-columns: 1fr; }
+      .qc-grid { grid-template-columns: 1fr; }
+      .footer-inner { align-items: flex-start; flex-direction: column; }
     }
-
-    .magnified-icon {
-      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    .zoom-ctrls {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.5rem;
-      margin-bottom: 1.25rem;
-    }
-
-    .zoom-btn-group {
-      display: flex;
-      gap: 0.35rem;
-    }
-
-    .zoom-btn {
-      background: var(--bg-darker);
-      border: 1px solid var(--border-color);
-      color: var(--text-muted);
-      padding: 0.3rem 0.6rem;
-      border-radius: var(--radius-sm);
-      font-size: 0.75rem;
-      font-family: 'JetBrains Mono', monospace;
-      cursor: pointer;
-    }
-
-    .zoom-btn.active {
-      background: var(--cyan-arcane);
-      color: #000;
-      font-weight: 700;
-      border-color: var(--cyan-arcane);
-    }
-
-    .bg-toggles {
-      display: flex;
-      gap: 0.35rem;
-    }
-
-    .bg-dot {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      border: 2px solid var(--border-color);
-      cursor: pointer;
-      position: relative;
-    }
-
-    .bg-dot.active {
-      border-color: var(--gold-glow);
-      transform: scale(1.15);
-    }
-
-    /* Meta Table */
-    .meta-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.82rem;
-    }
-
-    .meta-table tr {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .meta-table td {
-      padding: 0.55rem 0;
-    }
-
-    .meta-label {
-      color: var(--text-dim);
-      font-weight: 500;
-      width: 40%;
-    }
-
-    .meta-val {
-      color: var(--text-main);
-      font-family: 'JetBrains Mono', monospace;
-      text-align: right;
-    }
-
-    .meta-val.highlight {
-      color: var(--emerald-glow);
-    }
-
-    .meta-val.cyan {
-      color: var(--cyan-arcane);
-    }
-
-    /* Verification Badge */
-    .qc-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: var(--emerald-pass);
-      padding: 0.4rem 0.8rem;
-      border-radius: var(--radius-md);
-      font-size: 0.78rem;
-      font-family: 'JetBrains Mono', monospace;
-      width: 100%;
-      justify-content: center;
-      margin-top: 1rem;
-    }
-
-    /* Manifest & Validation Tabs View */
-    .extra-views {
-      margin-top: 4rem;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-xl);
-      padding: 2rem;
-    }
-
-    .tab-header {
-      display: flex;
-      gap: 1rem;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .view-tab-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      font-weight: 600;
-      padding: 0.5rem 1rem;
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      font-family: inherit;
-    }
-
-    .view-tab-btn.active {
-      background: var(--bg-card-hover);
-      color: var(--gold-glow);
-    }
-
-    .tab-pane {
-      display: none;
-    }
-
-    .tab-pane.active {
-      display: block;
-    }
-
-    pre.code-block {
-      background: var(--bg-darkest);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 1.25rem;
-      color: #94a3b8;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.82rem;
-      line-height: 1.6;
-      overflow-x: auto;
-      max-height: 400px;
-    }
-
-    /* Checklist */
-    .qc-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.25rem;
-    }
-
-    .qc-item {
-      background: var(--bg-darker);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 1.2rem;
-      display: flex;
-      gap: 0.85rem;
-      align-items: flex-start;
-    }
-
-    .qc-icon {
-      width: 28px;
-      height: 28px;
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid var(--emerald-pass);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--emerald-glow);
-      font-size: 0.85rem;
-      flex-shrink: 0;
-    }
-
-    .qc-content h5 {
-      font-size: 0.9rem;
-      color: var(--text-main);
-      margin-bottom: 0.25rem;
-    }
-
-    .qc-content p {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
-
-    /* Footer */
-    footer {
-      border-top: 1px solid var(--border-color);
-      padding: 2.5rem 2rem;
-      text-align: center;
-      color: var(--text-dim);
-      font-size: 0.85rem;
-      margin-top: 5rem;
-      background: var(--bg-darkest);
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
     }
   </style>
 </head>
 <body>
-
-  <!-- Top Header Navigation -->
-  <header>
-    <div class="nav-container">
-      <div class="brand">
-        <div class="brand-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-            <polyline points="2 17 12 22 22 17"></polyline>
-            <polyline points="2 12 12 17 22 12"></polyline>
-          </svg>
-        </div>
-        <div>
-          <div class="brand-title">PIXEL ICON FORGE</div>
-          <div class="brand-tag">Production Pipeline Skill Showcase</div>
-        </div>
-      </div>
-
-      <nav class="nav-links">
-        <button class="nav-tab-btn active" onclick="scrollToSection('gallery')">Icon Explorer</button>
-        <button class="nav-tab-btn" onclick="scrollToSection('pipeline')">Pipeline Flow</button>
-        <button class="nav-tab-btn" onclick="scrollToSection('manifest')">Manifest & QC</button>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="#top" aria-label="Infinity Forest asset forge home">
+        <span class="seal" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 4.5 7.2v8.6L12 20l7.5-4.2V7.2L12 3Z"/><path d="m4.8 7.5 7.2 4.1 7.2-4.1M12 11.6V20"/></svg>
+        </span>
+        <span><span class="brand-name">Infinity Forest</span><span class="brand-sub">Asset forge / field guide 01</span></span>
+      </a>
+      <nav class="topnav" aria-label="Primary">
+        <a href="#catalog">Catalog</a>
+        <a href="#workflow">Workflow</a>
+        <a href="#proof">QC report</a>
+        <button class="nav-cta" onclick="copyPrompt()">Copy the recipe</button>
       </nav>
     </div>
   </header>
 
-  <!-- Main Container -->
-  <div class="main-container">
-
-    <!-- Hero Section -->
+  <main id="top">
     <section class="hero">
-      <div class="hero-badge">Verified Production Case Study</div>
-      <h1 class="hero-title">Infinity Forest <span>88-Icon RPG Pack</span></h1>
-      <p class="hero-desc">
-        Demonstration of the end-to-end skill pipeline: from raw prompt specifications to deterministic multi-sheet grid generation, coordinate manifest synthesis, nearest-neighbor slice execution, RGBA transparency validation, and structured project export.
-      </p>
-
-      <!-- Stats Grid -->
-      <div class="stats-grid">
-        <div class="stat-card" style="--accent: var(--gold-primary);">
-          <div class="stat-num">88 <small>PNG</small></div>
-          <div class="stat-label">Total Sliced Icons</div>
+      <div class="wrap hero-grid">
+        <div>
+          <div class="eyebrow">A practical RPG asset showcase</div>
+          <h1>Build a world, <em>one icon</em> at a time.</h1>
+          <p class="hero-copy">A browsable pack of 88 game-ready icons, plus the prompt recipe and production trail behind them. Use the examples as a starting point for your own ChatGPT asset brief.</p>
+          <div class="hero-actions">
+            <a class="primary-btn" href="#catalog">Open the catalog <span aria-hidden="true">↘</span></a>
+            <a class="text-btn" href="#workflow">Read the production trail <span aria-hidden="true">→</span></a>
+          </div>
+          <p class="hero-note">Generated as a deterministic icon pipeline · 32px + 48px exports</p>
         </div>
-        <div class="stat-card" style="--accent: var(--cyan-arcane);">
-          <div class="stat-num">8 <small>Cats</small></div>
-          <div class="stat-label">Functional Categories</div>
-        </div>
-        <div class="stat-card" style="--accent: var(--purple-accent);">
-          <div class="stat-num">32<small>px</small> & 48<small>px</small></div>
-          <div class="stat-label">Multi-Size Dual Atlases</div>
-        </div>
-        <div class="stat-card" style="--accent: var(--emerald-pass);">
-          <div class="stat-num">100%</div>
-          <div class="stat-label">Nearest-Neighbor RGBA Pass</div>
+        <div class="artifact-stage" aria-label="Featured icon pack preview">
+          <div class="artifact-plate">
+            <span class="orbit-label north">artifact set / 88 entries</span>
+            <span class="orbit-label east">transparent rgba / ready</span>
+            <div class="hero-icon"><img class="pixel-art" src="./asset/icons/skills/storm.png" alt="Storm ability icon"></div>
+            <div class="orbit-chip one"><img class="pixel-art" src="./asset/icons/skills/slash.png" alt=""><span>slash<br><small>skill / 32px</small></span></div>
+            <div class="orbit-chip two"><img class="pixel-art" src="./asset/icons/paths/frostmage.png" alt=""><span>frostmage<br><small>path / 48px</small></span></div>
+            <div class="orbit-chip three"><img class="pixel-art" src="./asset/icons/boons/mend.png" alt=""><span>mend · boon</span></div>
+          </div>
+          <div class="artifact-caption"><span><strong>INFINITY FOREST</strong> / ICON PACK</span><span>PLATE 001</span></div>
         </div>
       </div>
     </section>
 
-    <!-- Pipeline Flow Stepper Section -->
-    <section id="pipeline" class="pipeline-section">
-      <div class="section-header">
-        <h2 class="section-title">End-to-End Skill Pipeline Execution</h2>
-        <span style="font-size: 0.8rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">Click any stage to view mechanics</span>
-      </div>
+    <section class="wrap statbar" aria-label="Pack summary">
+      <div class="stat"><div class="stat-num">88</div><div class="stat-label">Sliced PNG artifacts</div></div>
+      <div class="stat"><div class="stat-num">08</div><div class="stat-label">Functional categories</div></div>
+      <div class="stat"><div class="stat-num">32 / 48</div><div class="stat-label">Pixel export sizes</div></div>
+      <div class="stat"><div class="stat-num">100%</div><div class="stat-label">RGBA + QC verified</div></div>
+    </section>
 
-      <div class="pipeline-stepper" id="pipelineStepper">
-        <!-- Steps rendered via JS -->
+    <section class="section wrap" id="catalog">
+      <div class="section-heading">
+        <div><div class="section-kicker">01 / Browse the pack</div><h2 class="section-title">A shelf for every part of play.</h2></div>
+        <p class="section-intro">Search by name, sort by purpose, then open any icon to see the exact file, crop, size, and class it belongs to.</p>
       </div>
+      <div class="catalog-shell">
+        <div class="catalog-toolbar">
+          <label class="search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 5 5"/></svg>
+            <input class="search-input" id="iconSearchInput" type="search" placeholder="Search slash, frost, mana..." aria-label="Search icons">
+          </label>
+          <div class="size-filters" aria-label="Filter by size">
+            <span class="filter-label">Scale</span>
+            <button class="size-pill active" data-size="all">All</button>
+            <button class="size-pill" data-size="32">32 × 32</button>
+            <button class="size-pill" data-size="48">48 × 48</button>
+          </div>
+        </div>
+        <div class="category-row" id="categoryPills" aria-label="Filter by category"></div>
+        <div class="gallery-layout">
+          <div>
+            <div class="gallery-meta"><span id="filteredCountLabel">Loading artifacts…</span><span class="mono">Click an entry to inspect</span></div>
+            <div class="icons-grid" id="iconsGrid" aria-live="polite"></div>
+          </div>
+          <aside class="inspector-panel" aria-label="Selected icon inspector">
+            <div class="inspector-head">
+              <div><div class="inspector-label">Selected artifact</div><h3 class="inspector-name" id="inspectorName">Loading</h3></div>
+              <span class="inspector-cat" id="inspectorCatBadge">—</span>
+            </div>
+            <div class="inspector-stage stage-checker-dark" id="magnifierStage"><img id="magnifierImg" class="pixel-art magnified-icon" src="./asset/icons/skills/storm.png" width="96" height="96" alt="Selected icon preview"></div>
+            <div class="inspector-controls">
+              <div class="zoom-btn-group" aria-label="Zoom controls">
+                <button class="zoom-btn" data-zoom=".75" onclick="setZoom(.75, this)">75%</button>
+                <button class="zoom-btn active" data-zoom="1.5" onclick="setZoom(1.5, this)">150%</button>
+                <button class="zoom-btn" data-zoom="2.5" onclick="setZoom(2.5, this)">250%</button>
+              </div>
+              <div class="bg-toggles" aria-label="Preview backgrounds">
+                <button class="bg-dot active" style="background:#101711" aria-label="Dark checker background" onclick="setStageBg('checker-dark', this)"></button>
+                <button class="bg-dot" style="background:#f5ecd8" aria-label="Light checker background" onclick="setStageBg('checker-light', this)"></button>
+                <button class="bg-dot" style="background:#fff" aria-label="White background" onclick="setStageBg('solid-white', this)"></button>
+                <button class="bg-dot" style="background:#000" aria-label="Black background" onclick="setStageBg('solid-black', this)"></button>
+              </div>
+            </div>
+            <table class="meta-table">
+              <tbody>
+                <tr><td class="meta-label">Output</td><td class="meta-val" id="metaOutput">Pending</td></tr>
+                <tr><td class="meta-label">Resolution</td><td class="meta-val" id="metaResolution">Pending</td></tr>
+                <tr><td class="meta-label">Atlas</td><td class="meta-val" id="metaSheet">Pending</td></tr>
+                <tr><td class="meta-label">Grid cell</td><td class="meta-val" id="metaGridCell">Pending</td></tr>
+                <tr><td class="meta-label">Crop origin</td><td class="meta-val" id="metaCrop">Pending</td></tr>
+                <tr><td class="meta-label">Hero class</td><td class="meta-val" id="metaHero">Pending</td></tr>
+              </tbody>
+            </table>
+            <div class="qc-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m5 12 4 4L19 6"/></svg>RGBA / nearest-neighbor verified</div>
+          </aside>
+        </div>
+      </div>
+    </section>
 
-      <div class="step-detail-box" id="stepDetailBox">
-        <div class="step-detail-left">
-          <h4 id="stepDetailTitle">Stage Details</h4>
-          <p id="stepDetailDesc">Loading pipeline documentation...</p>
+    <section class="wrap recipe" id="recipe">
+      <div>
+        <div class="section-kicker">The spellbook</div>
+        <h2 class="recipe-title">Give ChatGPT a world it can keep coherent.</h2>
+        <p class="recipe-copy">Start with a style anchor, define the grid, then describe what must stay stable. This is the small brief behind the pack.</p>
+      </div>
+      <div class="recipe-card">
+        <div class="recipe-head"><span>MASTER PROMPT / ICON SET</span><button class="copy-btn" onclick="copyPrompt()">Copy prompt</button></div>
+        <pre class="recipe-code" id="promptText">Create a cohesive RPG icon set for a dark forest kingdom.
+Use crisp 16-bit pixel art, hard-edged pixels, no anti-aliasing,
+a limited palette, one-pixel dark outline, and top-left lighting.
+Keep one centered symbol per square tile, generous internal padding,
+and a consistent visual weight across the whole set.
+Output transparent PNGs at the requested size. Avoid text and logos.</pre>
+        <div class="recipe-points">
+          <div class="recipe-point"><b>01 / Style anchor</b><span>Palette, light, outline, era.</span></div>
+          <div class="recipe-point"><b>02 / Grid contract</b><span>Cell size, margins, no bleed.</span></div>
+          <div class="recipe-point"><b>03 / Export rules</b><span>RGBA, nearest neighbor, named paths.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section wrap workflow" id="workflow">
+      <div class="section-heading">
+        <div><div class="section-kicker">02 / Follow the trail</div><h2 class="section-title">From prompt to production folder.</h2></div>
+        <p class="section-intro">Every step has a job. Click through the trail to see which constraints protect the final pack.</p>
+      </div>
+      <div class="pipeline">
+        <div class="pipeline-nav" id="pipelineStepper"></div>
+        <div class="pipeline-detail">
+          <div class="section-kicker" id="stepDetailKicker">Stage 01</div>
+          <h3 id="stepDetailTitle">Specification parsing</h3>
+          <p id="stepDetailDesc">Loading pipeline documentation…</p>
           <ul class="step-highlights" id="stepDetailHighlights"></ul>
-        </div>
-        <div class="step-detail-right">
-          <pre class="step-code-preview" id="stepCodePreview"></pre>
+          <pre class="step-code" id="stepCodePreview"></pre>
         </div>
       </div>
     </section>
 
-    <!-- Interactive Icon Gallery & Inspector -->
-    <section id="gallery">
-      <div class="section-header">
-        <h2 class="section-title">Interactive Asset Explorer & Pixel Inspector</h2>
-        <span style="font-size: 0.85rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;" id="filteredCountLabel">Showing 88 of 88 icons</span>
+    <section class="wrap proof" id="proof">
+      <div class="section-heading">
+        <div><div class="section-kicker">03 / Ship with confidence</div><h2 class="section-title">The receipts are part of the pack.</h2></div>
+        <p class="section-intro">Open the checks, manifest, or slicer excerpt when you need to explain how the assets were made.</p>
       </div>
-
-      <!-- Controls -->
-      <div class="gallery-controls">
-        <div class="controls-top-row">
-          <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="iconSearchInput" class="search-input" placeholder="Search icon by name (e.g. slash, frost, mana)...">
-          </div>
-
-          <div class="size-filter-group">
-            <button class="size-pill active" data-size="all">All Sizes</button>
-            <button class="size-pill" data-size="32">32×32 (62)</button>
-            <button class="size-pill" data-size="48">48×48 (26)</button>
-          </div>
-        </div>
-
-        <!-- Category Filter Pills -->
-        <div class="category-pills" id="categoryPills">
-          <!-- Populated by JS -->
-        </div>
+      <div class="proof-tabs">
+        <button class="view-tab-btn active" onclick="switchViewTab('validation', this)">Validation report</button>
+        <button class="view-tab-btn" onclick="switchViewTab('json', this)">Coordinate manifest</button>
+        <button class="view-tab-btn" onclick="switchViewTab('pipeline-code', this)">Slicer excerpt</button>
       </div>
-
-      <!-- Gallery Grid & Inspector Sidebar -->
-      <div class="gallery-layout">
-        <div class="icons-grid-container" id="iconsGrid">
-          <!-- Dynamically generated icon cards -->
-        </div>
-
-        <!-- Sticky Inspector Sidebar -->
-        <aside class="inspector-panel" id="inspectorPanel">
-          <div class="inspector-header">
-            <span class="inspector-title" id="inspectorName">slash.png</span>
-            <span style="font-size: 0.75rem; color: var(--cyan-arcane); font-family: 'JetBrains Mono', monospace;" id="inspectorCatBadge">SKILLS</span>
-          </div>
-
-          <!-- Magnifier Stage -->
-          <div class="inspector-magnifier-stage stage-checker-dark" id="magnifierStage">
-            <img id="magnifierImg" src="" alt="Icon Preview" class="pixel-art magnified-icon" style="transform: scale(4);">
-          </div>
-
-          <!-- Zoom & Background controls -->
-          <div class="zoom-ctrls">
-            <div class="zoom-btn-group">
-              <button class="zoom-btn" onclick="setZoom(1)">1×</button>
-              <button class="zoom-btn" onclick="setZoom(2)">2×</button>
-              <button class="zoom-btn active" onclick="setZoom(4)">4×</button>
-              <button class="zoom-btn" onclick="setZoom(6)">6×</button>
-            </div>
-
-            <div class="bg-toggles">
-              <div class="bg-dot active" style="background: #0f1420;" title="Dark Checkerboard" onclick="setStageBg('checker-dark', this)"></div>
-              <div class="bg-dot" style="background: #ffffff;" title="Light Checkerboard" onclick="setStageBg('checker-light', this)"></div>
-              <div class="bg-dot" style="background: #000000;" title="Pitch Black" onclick="setStageBg('solid-black', this)"></div>
-              <div class="bg-dot" style="background: #ffffff;" title="Solid White" onclick="setStageBg('solid-white', this)"></div>
-            </div>
-          </div>
-
-          <!-- Metadata table -->
-          <table class="meta-table">
-            <tbody>
-              <tr>
-                <td class="meta-label">Output Path</td>
-                <td class="meta-val cyan" id="metaOutput" style="font-size: 0.75rem;">asset/icons/skills/slash.png</td>
-              </tr>
-              <tr>
-                <td class="meta-label">Resolution</td>
-                <td class="meta-val highlight" id="metaResolution">32 × 32 px</td>
-              </tr>
-              <tr>
-                <td class="meta-label">Atlas Sheet</td>
-                <td class="meta-val" id="metaSheet">32x32 (1122×1402)</td>
-              </tr>
-              <tr>
-                <td class="meta-label">Atlas Grid Cell</td>
-                <td class="meta-val" id="metaGridCell">Row 0, Col 0</td>
-              </tr>
-              <tr>
-                <td class="meta-label">Crop Rect (X,Y)</td>
-                <td class="meta-val" id="metaCrop">0, 0 (140×140)</td>
-              </tr>
-              <tr>
-                <td class="meta-label">Sub-category / Hero</td>
-                <td class="meta-val" id="metaHero">Soldier</td>
-              </tr>
-              <tr>
-                <td class="meta-label">Color Model</td>
-                <td class="meta-val highlight">RGBA (Alpha Channel)</td>
-              </tr>
-              <tr>
-                <td class="meta-label">Resize Kernel</td>
-                <td class="meta-val highlight">Nearest Neighbor</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div class="qc-badge">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            Automated QC Passed
-          </div>
-        </aside>
-      </div>
-    </section>
-
-    <!-- Manifest & Validation Section -->
-    <section id="manifest" class="extra-views">
-      <div class="tab-header">
-        <button class="view-tab-btn active" onclick="switchViewTab('validation', this)">Validation & Verification Report</button>
-        <button class="view-tab-btn" onclick="switchViewTab('json', this)">Raw Coordinate Manifest (JSON)</button>
-        <button class="view-tab-btn" onclick="switchViewTab('pipeline-code', this)">Deterministic Slicer Script</button>
-      </div>
-
-      <!-- Tab Pane 1: Validation Report -->
-      <div id="tab-validation" class="tab-pane active">
-        <div class="qc-grid">
-          <div class="qc-item">
-            <div class="qc-icon">✓</div>
-            <div class="qc-content">
-              <h5>Exact Count Parity (88 / 88)</h5>
-              <p>Requested spec count, generated sheet count, coordinate manifest items, and exported filesystem files matched identically with zero omissions.</p>
-            </div>
-          </div>
-          <div class="qc-item">
-            <div class="qc-icon">✓</div>
-            <div class="qc-content">
-              <h5>Multi-Resolution Integrity</h5>
-              <p>Dual sheet sizing verified: 62 gameplay icons strictly at 32×32 px, and 26 paths/titles/difficulty emblems strictly at 48×48 px.</p>
-            </div>
-          </div>
-          <div class="qc-item">
-            <div class="qc-icon">✓</div>
-            <div class="qc-content">
-              <h5>Crisp Nearest-Neighbor Resampling</h5>
-              <p>Strictly bypassed bilinear/bicubic filtering. Zero blurring, zero anti-aliased fuzzy halos, preserving authentic 16-bit pixel art outlines.</p>
-            </div>
-          </div>
-          <div class="qc-item">
-            <div class="qc-icon">✓</div>
-            <div class="qc-content">
-              <h5>RGBA Transparency Verification</h5>
-              <p>True 4-channel RGBA PNGs. Verified zero solid black/white background artifacts, and no accidental magenta chroma-key leaks.</p>
-            </div>
-          </div>
-          <div class="qc-item">
-            <div class="qc-icon">✓</div>
-            <div class="qc-content">
-              <h5>Safe Path-Based Namespacing</h5>
-              <p>Identical filenames across different categories (e.g. <code>skills/guard.png</code> vs <code>boons/guard.png</code>) safely segregated without collisions.</p>
-            </div>
-          </div>
-          <div class="qc-item">
-            <div class="qc-icon">✓</div>
-            <div class="qc-content">
-              <h5>Production ZIP Structure</h5>
-              <p>Full folder hierarchy preserved inside archive root alongside <code>icon_grid_manifest.json</code> and developer <code>README.txt</code>.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tab Pane 2: JSON Manifest -->
-      <div id="tab-json" class="tab-pane">
-        <pre class="code-block" id="manifestJsonBlock">// Loading manifest...</pre>
-      </div>
-
-      <!-- Tab Pane 3: Code Script -->
-      <div id="tab-pipeline-code" class="tab-pane">
-        <pre class="code-block">// Programmatic Slicing & Resizing Pipeline
+      <div id="tab-validation" class="tab-pane active"><div class="qc-grid">
+        <article class="qc-item"><div class="qc-icon">01</div><div class="qc-content"><h4>Count parity</h4><p>Requested icons, manifest entries, and exported files match at 88 of 88.</p></div></article>
+        <article class="qc-item"><div class="qc-icon">02</div><div class="qc-content"><h4>Two clear scales</h4><p>Gameplay icons land at 32 × 32. Paths, titles, and difficulty emblems land at 48 × 48.</p></div></article>
+        <article class="qc-item"><div class="qc-icon">03</div><div class="qc-content"><h4>Nearest neighbor</h4><p>Hard pixel edges survive the resize with no soft interpolation or fuzzy halos.</p></div></article>
+        <article class="qc-item"><div class="qc-icon">04</div><div class="qc-content"><h4>True transparency</h4><p>RGBA output keeps the icons ready for compositing over any game surface.</p></div></article>
+        <article class="qc-item"><div class="qc-icon">05</div><div class="qc-content"><h4>Safe namespaces</h4><p>Shared names such as guard and focus stay separate inside their category folders.</p></div></article>
+        <article class="qc-item"><div class="qc-icon">06</div><div class="qc-content"><h4>Drop-in structure</h4><p>The archive preserves asset folders, the manifest, and the README beside the icons.</p></div></article>
+      </div></div>
+      <div id="tab-json" class="tab-pane"><pre class="code-block" id="manifestJsonBlock">// Loading manifest…</pre></div>
+      <div id="tab-pipeline-code" class="tab-pane"><pre class="code-block">// Programmatic slicing and resizing
 const sharp = require('sharp');
 const manifest = require('./icon_grid_manifest.json');
 
-async function sliceAndExport() {
-  for (const [sheetKey, sheet] of Object.entries(manifest.sheets)) {
-    const atlasImg = sharp(sheet.source);
-    
-    for (const icon of sheet.icons) {
-      await sharp(sheet.source)
-        .extract({
-          left: icon.x,
-          top: icon.y,
-          width: icon.width,
-          height: icon.height
-        })
-        .resize(sheet.final_icon_size, sheet.final_icon_size, {
-          kernel: sharp.kernel.nearest // Crucial for pixel art
-        })
-        .png()
-        .toFile(icon.output);
-        
-      console.log(`✓ Sliced & saved [${sheet.final_icon_size}x${sheet.final_icon_size}]: ${icon.output}`);
-    }
+for (const [sheetKey, sheet] of Object.entries(manifest.sheets)) {
+  for (const icon of sheet.icons) {
+    await sharp(sheet.source)
+      .extract({ left: icon.x, top: icon.y, width: icon.width, height: icon.height })
+      .resize(sheet.final_icon_size, sheet.final_icon_size, {
+        kernel: sharp.kernel.nearest
+      })
+      .png()
+      .toFile(icon.output);
   }
-}
-sliceAndExport();</pre>
-      </div>
+}</pre></div>
     </section>
-
-  </div>
+  </main>
 
   <footer>
-    <p>Pixel Game Icon Generator, Atlas Builder & Auto Slicer &bull; Antigravity Production Skill Showcase</p>
+    <div class="wrap footer-inner"><span>Infinity Forest / Pixel Game Icon Generator showcase</span><span>Built for curious makers</span></div>
   </footer>
 
-  <!-- Include Local Manifest Data directly to support file:// protocol seamlessly -->
   <script src="./manifest-data.js"></script>
-
   <script>
-    // Pipeline Stages Data
     const PIPELINE_STAGES = [
-      {
-        num: 1,
-        title: "Spec Parsing",
-        sub: "Count & Duplicates",
-        detailTitle: "Stage 1: Specification Parsing & Deduplication",
-        desc: "Ingests the user's icon inventory, calculates total assets, classifies dimensions, and establishes composite keys (category + filename) to prevent path collisions.",
-        highlights: [
-          "Calculates 88 total icons across 8 game domains",
-          "Separates 32×32 (62 icons) from 48×48 (26 icons) size classes",
-          "Detects shared names (e.g. guard, focus) across categories",
-          "Calculates batch groupings per hero class and theme"
-        ],
-        code: `// Stage 1 Summary
-Total requested: 88 icons
-32x32: Skills (36), Resources (4), Status (4), Boons (6), Stats (12) = 62
-48x48: Paths (12), Titles (10), Difficulty (4) = 26
-Collisions resolved via category prefix paths.`
-      },
-      {
-        num: 2,
-        title: "Master Style",
-        sub: "Benchmark Prompting",
-        detailTitle: "Stage 2: Master Style & Cohesion Benchmarking",
-        desc: "Defines the lighting direction, palette bounds, and pixel art constraints. Generates a small benchmark set (6-12 icons) to lock in visual language before full atlas synthesis.",
-        highlights: [
-          "Fixed top-left lighting and 1px crisp dark outlines",
-          "No anti-aliasing or continuous soft gradients",
-          "Controlled 8-12 color palette matching dark fantasy SNES aesthetic",
-          "Validated readability at miniature 32×32 canvas dimensions"
-        ],
-        code: `// Master Prompt Formula
-pixel art RPG game icon,
-crisp hard-edged pixels, no anti-aliasing,
-limited palette, 1-pixel dark outline,
-single centered symbol, top-left lighting,
-three shading steps, 16-bit SNES RPG style,
-no text`
-      },
-      {
-        num: 3,
-        title: "Atlas Synthesis",
-        sub: "Deterministic Grid",
-        detailTitle: "Stage 3: Multi-Sheet Atlas Generation",
-        desc: "Constructs uniform sprite atlases where every icon is isolated within mathematically structured grid cells with generous internal margins to prevent bleed.",
-        highlights: [
-          "32x32 Sheet: 8 cols × 10 rows (140×140 cell width)",
-          "48x48 Sheet: 5 cols × 6 rows (229×229 cell width)",
-          "Sufficient internal safety padding to prevent glow leakage",
-          "Separated sheets by resolution class to optimize memory"
-        ],
-        code: `// Atlas Prompt Grid Constraint
-icons arranged on a perfectly uniform grid,
-equal cell dimensions (140x140), equal spacing,
-each icon centered with large empty padding,
-no icon crossing cell boundaries, no overlapping glow.`
-      },
-      {
-        num: 4,
-        title: "Manifest Synthesis",
-        sub: "JSON Coordinates",
-        detailTitle: "Stage 4: Coordinate Mapping & Manifest Generation",
-        desc: "Measures actual dimensions of the output image, discards trailing border pixels, and maps each icon to its deterministic (col, row, x, y, width, height) coordinates.",
-        highlights: [
-          "Measures actual source size (1122×1402 px)",
-          "Accounts for 2px trailing edge offsets cleanly",
-          "Maps each icon to its designated hero and file output",
-          "Exports production coordinate manifest JSON"
-        ],
-        code: `// Manifest Grid Record
-{
-  "index": 0, "row": 0, "col": 0,
-  "x": 0, "y": 0, "width": 140, "height": 140,
-  "file": "slash.png",
-  "category": "skills",
-  "output": "asset/icons/skills/slash.png"
-}`
-      },
-      {
-        num: 5,
-        title: "Auto Slicer",
-        sub: "Nearest Neighbor",
-        detailTitle: "Stage 5: Programmatic Slicing & Resizing",
-        desc: "Iterates through the manifest to crop every individual icon from the atlas, resampling directly to target dimensions with a strict nearest-neighbor kernel.",
-        highlights: [
-          "Sharp / Canvas automated headless execution",
-          "Nearest-neighbor scaling avoids blurry anti-aliasing",
-          "Enforces 4-channel RGBA with zero color degradation",
-          "Preserves crystal-clear 1px pixel contours"
-        ],
-        code: `// Sharp Slicing Pipeline
-sharp(sheet.source)
-  .extract({ left: icon.x, top: icon.y, width: icon.w, height: icon.h })
-  .resize(targetSize, targetSize, {
-    kernel: sharp.kernel.nearest // MANDATORY
-  })
-  .png().toFile(icon.output);`
-      },
-      {
-        num: 6,
-        title: "Validation & QC",
-        sub: "Integrity Assertion",
-        detailTitle: "Stage 6: Automated Multi-Point Quality Control",
-        desc: "Verifies every asset before delivery: file counts, exact dimensions, alpha channel presence, and validates that zero expected files are missing.",
-        highlights: [
-          "Asserts 88 of 88 files exist on filesystem",
-          "Checks 32x32 & 48x48 exact resolution for all outputs",
-          "Guarantees RGBA transparency without black/white backdrops",
-          "Verifies integrity against original specification"
-        ],
-        code: `// Automated Assertion Checklist
-✓ Count: 88/88 match
-✓ Dimensions: 62 @ 32x32, 26 @ 48x48
-✓ Transparency: RGBA confirmed
-✓ Path collisions: 0 detected
-✓ Output package ready`
-      },
-      {
-        num: 7,
-        title: "ZIP Packaging",
-        sub: "Production Structure",
-        detailTitle: "Stage 7: Production-Ready Asset Packaging",
-        desc: "Preserves the complete categorized folder structure inside an archive alongside the coordinate manifest and README developer guide.",
-        highlights: [
-          "Folder hierarchy: asset/icons/{category}/",
-          "Includes icon_grid_manifest.json and README.txt",
-          "Zero root-level loose files cluttering the project",
-          "Directly extractable into game engine asset folders"
-        ],
-        code: `// Package Structure
-icons.zip
-├── asset/icons/
-│   ├── skills/
-│   ├── resources/
-│   ├── status/
-│   ├── boons/
-│   ├── stats/
-│   ├── paths/
-│   ├── titles/
-│   └── difficulty/
-├── icon_grid_manifest.json
-└── README.txt`
-      }
+      { title: "Specification parsing", sub: "Count & duplicates", desc: "The inventory becomes a plan: totals, size classes, categories, and composite paths are known before generation starts.", highlights: ["88 total icons across 8 domains", "32 × 32 and 48 × 48 size classes", "Shared names kept collision-safe", "Hero groups ready for batching"], code: "// Stage 01\nTotal requested: 88\n32x32: 62 icons\n48x48: 26 icons\nCollisions resolved by category paths." },
+      { title: "Master style", sub: "Benchmark prompt", desc: "A small benchmark set locks the light, palette, outline, and pixel rules before the full atlas is requested.", highlights: ["Top-left lighting direction", "Hard edges with no anti-aliasing", "Limited 8–12 color palette", "Readable at miniature scale"], code: "// Master style contract\npixel art RPG game icon\ncrisp hard-edged pixels\nlimited palette · 1px outline\n16-bit SNES RPG style · no text" },
+      { title: "Atlas synthesis", sub: "Deterministic grid", desc: "Uniform cells keep each icon isolated and give the slicer an exact place to look.", highlights: ["8 columns × 10 rows on the 32px atlas", "5 columns × 6 rows on the 48px atlas", "Internal safety padding", "Separate sheets by resolution"], code: "// Atlas constraint\nicons arranged on a perfectly uniform grid\nequal cells · equal spacing\nno icon crossing cell boundaries" },
+      { title: "Manifest mapping", sub: "JSON coordinates", desc: "The sheet becomes a map of rows, columns, crop origins, and output paths that another tool can trust.", highlights: ["Source dimensions measured", "Trailing edge pixels accounted for", "Hero class stored per icon", "Production JSON exported"], code: '// Grid record\n{ "row": 0, "col": 0,\n  "x": 0, "y": 0,\n  "file": "slash.png" }' },
+      { title: "Auto slicer", sub: "Nearest neighbor", desc: "The manifest drives the crop and resize loop, keeping every output crisp and repeatable.", highlights: ["Headless Sharp execution", "Nearest-neighbor scaling", "Four-channel RGBA output", "One path per exported icon"], code: "// Sharp resize\n.resize(size, size, {\n  kernel: sharp.kernel.nearest\n})\n.png().toFile(icon.output);" },
+      { title: "Validation & QC", sub: "Integrity checks", desc: "The pack earns its handoff by checking counts, dimensions, alpha, and missing files before it is packaged.", highlights: ["88 of 88 files present", "Exact resolution checks", "RGBA transparency confirmed", "Expected paths verified"], code: "// Assertions\n✓ Count: 88 / 88\n✓ Dimensions: 62 @ 32px\n✓ Transparency: RGBA\n✓ Missing files: 0" },
+      { title: "ZIP packaging", sub: "Production structure", desc: "The final folder is ready to drop into a project, with the evidence needed to understand it later.", highlights: ["Categorized asset folders", "Manifest beside the exports", "README included", "No loose root files"], code: "// Package\nasset/icons/{category}/\nicon_grid_manifest.json\nREADME.txt" }
     ];
 
-    // Global State
-    let allIcons = [];
-    let currentCategory = 'all';
-    let currentSize = 'all';
-    let searchQuery = '';
-    let selectedIcon = null;
+    let allIcons = [], currentCategory = "all", currentSize = "all", searchQuery = "", selectedIcon = null;
 
-    // Initialize Application
     document.addEventListener("DOMContentLoaded", () => {
       initPipelineStepper();
       loadManifestData();
-      initControls();
+      document.getElementById("iconSearchInput").addEventListener("input", (e) => { searchQuery = e.target.value.toLowerCase().trim(); renderIcons(); });
+      document.querySelectorAll(".size-pill").forEach((pill) => pill.addEventListener("click", () => {
+        document.querySelectorAll(".size-pill").forEach((p) => p.classList.remove("active"));
+        pill.classList.add("active"); currentSize = pill.dataset.size; renderIcons();
+      }));
     });
 
     function initPipelineStepper() {
-      const stepper = document.getElementById("pipelineStepper");
-      stepper.innerHTML = PIPELINE_STAGES.map((s, idx) => `
-        <div class="pipeline-step ${idx === 0 ? 'active' : ''}" onclick="selectPipelineStep(${idx})">
-          <div class="step-badge">${s.num}</div>
-          <div class="step-title">${s.title}</div>
-          <div class="step-sub">${s.sub}</div>
-        </div>
-      `).join("");
+      document.getElementById("pipelineStepper").innerHTML = PIPELINE_STAGES.map((s, i) =>
+        `<button class="pipeline-step ${i === 0 ? "active" : ""}" onclick="selectPipelineStep(${i})"><span class="step-number">${String(i + 1).padStart(2, "0")}</span><span><span class="step-title">${s.title}</span><span class="step-sub">${s.sub}</span></span></button>`).join("");
       selectPipelineStep(0);
     }
 
-    function selectPipelineStep(idx) {
-      document.querySelectorAll(".pipeline-step").forEach((el, i) => {
-        el.classList.toggle("active", i === idx);
-      });
-      const stage = PIPELINE_STAGES[idx];
-      document.getElementById("stepDetailTitle").textContent = stage.detailTitle;
+    function selectPipelineStep(index) {
+      document.querySelectorAll(".pipeline-step").forEach((el, i) => el.classList.toggle("active", i === index));
+      const stage = PIPELINE_STAGES[index];
+      document.getElementById("stepDetailKicker").textContent = `Stage ${String(index + 1).padStart(2, "0")}`;
+      document.getElementById("stepDetailTitle").textContent = stage.title;
       document.getElementById("stepDetailDesc").textContent = stage.desc;
-      document.getElementById("stepDetailHighlights").innerHTML = stage.highlights.map(h => `
-        <li><span class="dot"></span> ${h}</li>
-      `).join("");
+      document.getElementById("stepDetailHighlights").innerHTML = stage.highlights.map((item) => `<li>${item}</li>`).join("");
       document.getElementById("stepCodePreview").textContent = stage.code;
     }
 
     function loadManifestData() {
-      let data = window.MANIFEST_DATA;
-      if (!data) {
-        // Fallback fetch if not present on window
-        fetch("./icon_grid_manifest.json")
-          .then(res => res.json())
-          .then(jsonData => {
-            processManifestData(jsonData);
-          })
-          .catch(err => {
-            console.error("Failed to fetch manifest json:", err);
-          });
-      } else {
-        processManifestData(data);
-      }
+      if (window.MANIFEST_DATA) return processManifestData(window.MANIFEST_DATA);
+      fetch("./icon_grid_manifest.json").then((res) => res.json()).then(processManifestData).catch(() => {
+        document.getElementById("filteredCountLabel").textContent = "Manifest could not be loaded";
+      });
     }
 
     function processManifestData(manifest) {
       document.getElementById("manifestJsonBlock").textContent = JSON.stringify(manifest, null, 2);
-
       allIcons = [];
-      const categoriesSet = new Set();
-
-      for (const [sheetKey, sheet] of Object.entries(manifest.sheets)) {
-        sheet.icons.forEach(item => {
-          allIcons.push({
-            ...item,
-            sheetKey: sheetKey,
-            targetSize: sheet.final_icon_size,
-            sourceWidth: sheet.source_width,
-            sourceHeight: sheet.source_height,
-            sourceFile: sheet.source
-          });
-          categoriesSet.add(item.category);
-        });
-      }
-
-      // Populate Category Filter Pills
-      const categoryPillsContainer = document.getElementById("categoryPills");
-      const sortedCats = Array.from(categoriesSet).sort();
-      
-      let pillsHtml = `
-        <button class="cat-btn active" data-category="all">
-          All <span class="cat-badge">${allIcons.length}</span>
-        </button>
-      `;
-
-      sortedCats.forEach(cat => {
-        const count = allIcons.filter(i => i.category === cat).length;
-        pillsHtml += `
-          <button class="cat-btn" data-category="${cat}">
-            ${cat.toUpperCase()} <span class="cat-badge">${count}</span>
-          </button>
-        `;
-      });
-
-      categoryPillsContainer.innerHTML = pillsHtml;
-
-      // Attach Category Listeners
-      categoryPillsContainer.querySelectorAll(".cat-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          categoryPillsContainer.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
-          btn.classList.add("active");
-          currentCategory = btn.getAttribute("data-category");
-          renderIcons();
-        });
-      });
-
-      // Render all icons and select the first
+      const categories = new Set();
+      Object.entries(manifest.sheets).forEach(([sheetKey, sheet]) => sheet.icons.forEach((item) => {
+        allIcons.push({ ...item, sheetKey, targetSize: sheet.final_icon_size, sourceWidth: sheet.source_width, sourceHeight: sheet.source_height });
+        categories.add(item.category);
+      }));
+      const ordered = Array.from(categories).sort();
+      document.getElementById("categoryPills").innerHTML = [
+        `<button class="cat-btn active" data-category="all">All <span class="cat-badge">${allIcons.length}</span></button>`,
+        ...ordered.map((cat) => `<button class="cat-btn" data-category="${cat}">${cat} <span class="cat-badge">${allIcons.filter((i) => i.category === cat).length}</span></button>`)
+      ].join("");
+      document.querySelectorAll(".cat-btn").forEach((button) => button.addEventListener("click", () => {
+        document.querySelectorAll(".cat-btn").forEach((b) => b.classList.remove("active"));
+        button.classList.add("active"); currentCategory = button.dataset.category; renderIcons();
+      }));
       renderIcons();
-      if (allIcons.length > 0) {
-        selectIcon(allIcons[0]);
-      }
-    }
-
-    function initControls() {
-      // Search Box
-      const searchInput = document.getElementById("iconSearchInput");
-      searchInput.addEventListener("input", (e) => {
-        searchQuery = e.target.value.toLowerCase().trim();
-        renderIcons();
-      });
-
-      // Size Filter Pills
-      document.querySelectorAll(".size-pill").forEach(pill => {
-        pill.addEventListener("click", () => {
-          document.querySelectorAll(".size-pill").forEach(p => p.classList.remove("active"));
-          pill.classList.add("active");
-          currentSize = pill.getAttribute("data-size");
-          renderIcons();
-        });
-      });
+      if (allIcons.length) selectIcon(allIcons[0]);
     }
 
     function renderIcons() {
       const grid = document.getElementById("iconsGrid");
-      
-      const filtered = allIcons.filter(icon => {
-        const matchCat = currentCategory === 'all' || icon.category === currentCategory;
-        const matchSize = currentSize === 'all' || icon.targetSize.toString() === currentSize;
-        const matchSearch = !searchQuery || 
-          icon.file.toLowerCase().includes(searchQuery) ||
-          icon.category.toLowerCase().includes(searchQuery) ||
-          (icon.hero && icon.hero.toLowerCase().includes(searchQuery));
-        return matchCat && matchSize && matchSearch;
+      const filtered = allIcons.filter((icon) => {
+        const categoryMatch = currentCategory === "all" || icon.category === currentCategory;
+        const sizeMatch = currentSize === "all" || String(icon.targetSize) === currentSize;
+        const searchMatch = !searchQuery || [icon.file, icon.category, icon.hero].filter(Boolean).some((value) => value.toLowerCase().includes(searchQuery));
+        return categoryMatch && sizeMatch && searchMatch;
       });
-
-      document.getElementById("filteredCountLabel").textContent = `Showing ${filtered.length} of ${allIcons.length} icons`;
-
-      if (filtered.length === 0) {
-        grid.innerHTML = `
-          <div style="grid-column: 1 / -1; padding: 4rem 1rem; text-align: center; color: var(--text-dim);">
-            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔍</div>
-            <p>No icons found matching your filter criteria.</p>
-          </div>
-        `;
+      document.getElementById("filteredCountLabel").textContent = `${filtered.length} of ${allIcons.length} artifacts`;
+      if (!filtered.length) {
+        grid.innerHTML = '<div style="grid-column:1/-1;padding:50px 12px;color:var(--moss);font: .72rem var(--mono);">No artifacts match this search. Try a category or a shorter name.</div>';
         return;
       }
-
-      grid.innerHTML = filtered.map(icon => {
-        const isSelected = selectedIcon && selectedIcon.file === icon.file && selectedIcon.category === icon.category;
-        const iconPath = `./${icon.output}`;
-        return `
-          <div class="icon-card ${isSelected ? 'selected' : ''}" onclick="selectIconByName('${icon.file}', '${icon.category}')">
-            <div class="icon-preview-box">
-              <img src="${iconPath}" alt="${icon.file}" class="pixel-art icon-preview-img" loading="lazy">
-            </div>
-            <div class="icon-card-name" title="${icon.file}">${icon.file}</div>
-            <div class="icon-card-dim">${icon.targetSize}×${icon.targetSize}</div>
-          </div>
-        `;
+      grid.innerHTML = filtered.map((icon) => {
+        const selected = selectedIcon && selectedIcon.file === icon.file && selectedIcon.category === icon.category;
+        return `<button class="icon-card ${selected ? "selected" : ""}" onclick="selectIconByName('${icon.file}', '${icon.category}')" aria-label="Inspect ${icon.file}">
+          <span class="icon-preview-box"><img class="pixel-art icon-preview-img" src="./${icon.output}" alt="" loading="lazy"></span>
+          <span class="icon-card-name" title="${icon.file}">${icon.file}</span><span class="icon-card-dim">${icon.targetSize} × ${icon.targetSize}</span>
+        </button>`;
       }).join("");
     }
 
-    function selectIconByName(file, category) {
-      const icon = allIcons.find(i => i.file === file && i.category === category);
-      if (icon) selectIcon(icon);
-    }
+    function selectIconByName(file, category) { const icon = allIcons.find((item) => item.file === file && item.category === category); if (icon) selectIcon(icon); }
 
     function selectIcon(icon) {
-      selectedIcon = icon;
-
-      // Update Selection UI
-      document.querySelectorAll(".icon-card").forEach(c => c.classList.remove("selected"));
-      // Highlight matching in view
-      const activeCard = Array.from(document.querySelectorAll(".icon-card")).find(c => {
-        return c.querySelector(".icon-card-name")?.textContent === icon.file;
-      });
-      if (activeCard) activeCard.classList.add("selected");
-
-      // Inspector Elements
-      document.getElementById("inspectorName").textContent = icon.file;
-      document.getElementById("inspectorCatBadge").textContent = icon.category.toUpperCase();
-      
-      const magnifierImg = document.getElementById("magnifierImg");
-      magnifierImg.src = `./${icon.output}`;
-      magnifierImg.alt = icon.file;
-
+      selectedIcon = icon; renderIcons();
+      document.getElementById("inspectorName").textContent = icon.file.replace(/[-_]/g, " ");
+      document.getElementById("inspectorCatBadge").textContent = icon.category;
+      const image = document.getElementById("magnifierImg"); image.src = `./${icon.output}`; image.alt = `${icon.file} icon`;
       document.getElementById("metaOutput").textContent = icon.output;
       document.getElementById("metaResolution").textContent = `${icon.targetSize} × ${icon.targetSize} px`;
-      document.getElementById("metaSheet").textContent = `${icon.sheetKey} (${icon.sourceWidth}×${icon.sourceHeight})`;
-      document.getElementById("metaGridCell").textContent = `Row ${icon.row}, Col ${icon.col} (#${icon.index})`;
-      document.getElementById("metaCrop").textContent = `${icon.x}, ${icon.y} (${icon.width}×${icon.height} px)`;
-      document.getElementById("metaHero").textContent = icon.hero ? icon.hero.toUpperCase() : "N/A";
+      document.getElementById("metaSheet").textContent = `${icon.sheetKey} · ${icon.sourceWidth} × ${icon.sourceHeight}`;
+      document.getElementById("metaGridCell").textContent = `row ${icon.row}, col ${icon.col} · #${icon.index}`;
+      document.getElementById("metaCrop").textContent = `${icon.x}, ${icon.y} · ${icon.width} × ${icon.height}`;
+      document.getElementById("metaHero").textContent = icon.hero || "—";
     }
 
-    function setZoom(factor) {
-      document.querySelectorAll(".zoom-btn").forEach(b => b.classList.remove("active"));
-      event.target.classList.add("active");
-      document.getElementById("magnifierImg").style.transform = `scale(${factor})`;
-    }
-
-    function setStageBg(type, btn) {
-      document.querySelectorAll(".bg-dot").forEach(d => d.classList.remove("active"));
-      btn.classList.add("active");
-      const stage = document.getElementById("magnifierStage");
-      stage.className = `inspector-magnifier-stage stage-${type}`;
-    }
-
-    function switchViewTab(tabId, btn) {
-      document.querySelectorAll(".view-tab-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-
-      document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
-      document.getElementById(`tab-${tabId}`).classList.add("active");
-    }
-
-    function scrollToSection(id) {
-      const el = document.getElementById(id);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
+    function setZoom(factor, button) { document.querySelectorAll(".zoom-btn").forEach((b) => b.classList.remove("active")); button.classList.add("active"); document.getElementById("magnifierImg").style.transform = `scale(${factor})`; }
+    function setStageBg(type, button) { document.querySelectorAll(".bg-dot").forEach((b) => b.classList.remove("active")); button.classList.add("active"); document.getElementById("magnifierStage").className = `inspector-stage stage-${type}`; }
+    function switchViewTab(tabId, button) { document.querySelectorAll(".view-tab-btn").forEach((b) => b.classList.remove("active")); button.classList.add("active"); document.querySelectorAll(".tab-pane").forEach((pane) => pane.classList.remove("active")); document.getElementById(`tab-${tabId}`).classList.add("active"); }
+    async function copyPrompt() {
+      const text = document.getElementById("promptText").textContent;
+      try { await navigator.clipboard.writeText(text); } catch (error) { const area = document.createElement("textarea"); area.value = text; document.body.appendChild(area); area.select(); document.execCommand("copy"); area.remove(); }
+      document.querySelectorAll(".copy-btn, .nav-cta").forEach((button) => { const original = button.textContent; button.textContent = "Copied"; setTimeout(() => button.textContent = original, 1300); });
     }
   </script>
 </body>
